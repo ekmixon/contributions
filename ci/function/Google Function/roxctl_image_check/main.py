@@ -17,30 +17,26 @@ def image_check(request):
             `output` -- the output of `roxctl image check`
     """
     request_json = request.get_json()
-    
+
     rox_central_endpoint = request_json['rox_central_endpoint']
     rox_api_token = request_json['rox_api_token']
     rox_image = request_json['rox_image']
 
-    print("Using roxctl to scan image: " + rox_image)
+    print(f"Using roxctl to scan image: {rox_image}")
 
     download_roxctl(rox_central_endpoint, rox_api_token)
 
     out,err = roxctl_image_check(rox_central_endpoint, rox_api_token, rox_image)
 
-    if err == 0:
-        err_text = "pass"
-    else:
-        err_text = "fail"
-
+    err_text = "pass" if err == 0 else "fail"
     json_return = {"build": err_text, "output": out.decode("utf-8")}
 
     return json.dumps(json_return)
 
 def download_roxctl(rox_central_endpoint, rox_api_token):
-    url = "https://" + rox_central_endpoint + "/api/cli/download/roxctl-linux"
-    token = "Bearer " + rox_api_token 
-    print("token: " + token)
+    url = f"https://{rox_central_endpoint}/api/cli/download/roxctl-linux"
+    token = f"Bearer {rox_api_token}"
+    print(f"token: {token}")
     headers = {'Authorization': token}
     r = requests.get(url, headers=headers)
     open('/tmp/roxctl', 'wb').write(r.content)
